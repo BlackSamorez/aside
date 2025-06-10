@@ -47,6 +47,32 @@
                     "data_model_path": "Qwen/Qwen2.5-7B"
                 }
             ]
+        },
+        "attention_rot": {
+            "pure_models": [
+                {
+                    "name": "attention_rot",
+                    "desc": "Qwen2.5 7B base model",
+                    "checkpoint_to_load_from": null,
+                    "checkpoint_to_load_to": "./models/Qwen2.5-7B/attention_rot",
+                    "chat_template_path": null,
+                    "instruct_model_path": "Qwen/Qwen2.5-7B",
+                    "data_model_path": "Qwen/Qwen2.5-7B"
+                }
+            ]
+        },
+        "position_shift": {
+            "pure_models": [
+                {
+                    "name": "position_shift",
+                    "desc": "Qwen2.5 7B base model",
+                    "checkpoint_to_load_from": null,
+                    "checkpoint_to_load_to": "./models/Qwen2.5-7B/position_shift",
+                    "chat_template_path": null,
+                    "instruct_model_path": "Qwen/Qwen2.5-7B",
+                    "data_model_path": "Qwen/Qwen2.5-7B"
+                }
+            ]
         }
     }
 }

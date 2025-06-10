@@ -67,6 +67,7 @@ def load_single_emb_model_and_tokenizer(
     rotation_direction=None,
     learned_rotation=None,
     gradual_rotation=None,
+    data_shift=None,
 ):
     """
     Load model and tokenizer for single embedding approaches (vanilla, ISE, ASIDE).
@@ -117,6 +118,8 @@ def load_single_emb_model_and_tokenizer(
         config.learned_rotation = learned_rotation
     if not hasattr(config, "gradual_rotation") or config.gradual_rotation is None:
         config.gradual_rotation = gradual_rotation
+    if not hasattr(config, "data_shift") or config.data_shift is None:
+        config.data_shift = data_shift
     print("Model config", config)
     if quant_4bit:
         bnb_config = BitsAndBytesConfig(
@@ -131,7 +134,7 @@ def load_single_emb_model_and_tokenizer(
         config=config,
         torch_dtype=model_dtype,
         quantization_config=bnb_config if quant_4bit else None,
-        attn_implementation="flash_attention_2",
+        attn_implementation="sdpa",
         low_cpu_mem_usage=True,
     )
 
@@ -237,6 +240,7 @@ class CustomModelHandler:
         rotation_direction=None,
         learned_rotation=None,
         gradual_rotation=None,
+        data_shift=None,
         max_token_len=512,
         load_from_checkpoint=False,
         model_dtype=torch.bfloat16,
@@ -270,7 +274,7 @@ class CustomModelHandler:
             rank (int, optional): Distributed training rank
             post_init_rotation (bool): Apply rotation after initialization
         """
-        assert embedding_type in ("single_emb", "double_emb", "ise", "forward_rot")
+        assert embedding_type in ("single_emb", "double_emb", "ise", "forward_rot", "attention_rot", "position_shift")
         if embedding_type == "single_emb":
             self.split_chat = False
         else:
@@ -296,6 +300,7 @@ class CustomModelHandler:
         self.rotation_direction = rotation_direction
         self.learned_rotation = learned_rotation
         self.gradual_rotation = gradual_rotation
+        self.data_shift = data_shift
         self.post_init_rotation = post_init_rotation
         self.debug_printed = False
         if access_token:
@@ -1389,7 +1394,7 @@ class CustomModelHandler:
 
         MODEL_CLASS_REGISTRY = {
             "llama": {
-                "double_emb": CustomLLaMA,
+                "double_emb": LlamaBase,
                 "single_emb": LlamaForCausalLM,
                 "ise": LlamaISE,
                 "forward_rot": LlamaForwardRot,
@@ -1398,6 +1403,8 @@ class CustomModelHandler:
                 "single_emb": Qwen2ForCausalLM,
                 "ise": QwenISE,
                 "forward_rot": QwenForwardRot,
+                "attention_rot": QwenAttentionRot,
+                "position_shift": QwenPositionShift,
             },
             "mistral": {
                 "single_emb": MistralBase,
@@ -1450,6 +1457,7 @@ class CustomModelHandler:
                 rotation_direction=self.rotation_direction,
                 learned_rotation=self.learned_rotation,
                 gradual_rotation=self.gradual_rotation,
+                data_shift=self.data_shift,
             )
         print(f"chat_template_path: {self.chat_template_path}")
         print("\n", "MODEL TYPE: ", type(self.model))

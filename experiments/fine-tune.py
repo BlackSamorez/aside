@@ -437,6 +437,7 @@ def main(model_family: str, emb_type: str, train_version: str, model_ix: int, ru
         rotation_direction=hparams["rotation_direction"], 
         learned_rotation=hparams["learned_rotation"],
         gradual_rotation=hparams["gradual_rotation"],
+        data_shift=hparams["data_shift"],
         model_dtype=torch.bfloat16,
         load_from_checkpoint=checkpoint_to_load_from is not None,
         post_init_rotation=hparams["post_init_rotation"]
@@ -549,7 +550,7 @@ def str2bool(v):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Fine-tune a model with optional hyperparameters.")
     parser.add_argument("--model_family", type=str, help="E.g., tiny_old, llama3_8b, etc.")
-    parser.add_argument("--emb_type", type=str, choices=["double_emb", "single_emb",  "ise", "forward_rot"], help="Embedding Type")
+    parser.add_argument("--emb_type", type=str, choices=["double_emb", "single_emb",  "ise", "forward_rot", "attention_rot", "position_shift"], help="Embedding Type")
     parser.add_argument("--model_ix", type=int, help="Index of the model in the pure_models list.")
     parser.add_argument("--run_number", type=str, default=0, help="Number of the run.")
     parser.add_argument("--train_version", type=str, help="e.g. SFTv11")
@@ -586,7 +587,7 @@ if __name__ == "__main__":
     parser.add_argument("--activation_checkpointing", type=bool, default=False,
                         help="Whether to use gradient checkpointing.")
     parser.add_argument("--remove_unused_columns", type=bool, default=False, help="Remove unused columns in dataset.")
-    parser.add_argument("--report_to", type=list, default=["none"],
+    parser.add_argument("--report_to", type=list, default=["wandb"],
                         help="Reporting framework (e.g., wandb, tensorboard).")
     parser.add_argument("--embedding_init", type=str, default=None, choices=[None, "copy", "rot_ind", "rot_isoclinic"],
                         help="Embedding initialization.")
@@ -605,6 +606,9 @@ if __name__ == "__main__":
     parser.add_argument("--post_init_rotation", type=str2bool, default=False, help="Rotate embedding after initialization (normally used when loading from checkpoint).")
 
     parser.add_argument("--gradual_rot", type=str2bool, default=False, help="Use gradual rotation every step of training during 1st epoch")
+
+    # data shift
+    parser.add_argument("--data_shift", type=int, default=-1024, help="Data shift.")
 
     # Parse the arguments
     args = parser.parse_args()

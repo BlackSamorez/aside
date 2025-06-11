@@ -41,7 +41,7 @@ from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoConfig
 
 from model_api import CustomModelHandler, format_prompt
-from model import CustomLLaMA, CustomLlamaConfig
+from model import CustomLlamaConfig
 
 torch.backends.cuda.enable_flash_sdp(False)
 torch.backends.cuda.enable_mem_efficient_sdp(False)
@@ -246,7 +246,7 @@ def get_model_outputs(data_path, data_size, use_input, remove_tags, model_name, 
     # Make sure the directory exists
     os.makedirs(save_dir, exist_ok=True)
 
-    print(f"Saving results to {save_path}")
+    print(f"Saving alpaca eval results to {save_path}")
     with open(save_path, "w+") as f:
         json.dump(results, f, indent=4)
 
@@ -263,7 +263,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--model', type=str, required=True, help='Path to the model')
     parser.add_argument('--max-new-tokens', type=int, default=1024, help='How many new tokens to generate')
-    parser.add_argument('--embedding-type', type=str, required=True, help='Type of embedding used in the model', choices=['single_emb', 'double_emb', "forward_rot", "ise"])
+    parser.add_argument('--embedding-type', type=str, required=True, help='Type of embedding used in the model', choices=['single_emb', 'double_emb', "forward_rot", "ise", "attention_rot", "position_shift"])
     parser.add_argument('--base-model', type=str, default="none", help='Path to the base model')
     parser.add_argument('--batch-size', type=int, default=16, help='Batch size for the model')
 

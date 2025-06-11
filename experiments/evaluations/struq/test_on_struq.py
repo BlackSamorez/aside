@@ -45,7 +45,7 @@ from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoConfig
 
 from model_api import CustomModelHandler, format_prompt
-from model import CustomLLaMA, CustomLlamaConfig
+from model import CustomLlamaConfig
 
 DOMAIN_TYPES = ["id", "ood"]
 ATTACK_TYPES = ["naive", "ignore", "escape_separation", "completion_real"]
@@ -477,7 +477,7 @@ def test_model_on_struq(data_path, domain, attack, model_name, embedding_type, b
     # Make sure the directory exists
     os.makedirs(save_dir, exist_ok=True)
 
-    print(f"Saving results to {save_path}")
+    print(f"Saving struq results to {save_path}")
     with open(save_path, "w+") as f:
         json.dump(results, f, indent=4)
 
@@ -520,7 +520,7 @@ if __name__ == "__main__":
 
 
     parser.add_argument('--model', type=str, required=True, help='Path to the model')
-    parser.add_argument('--embedding_type', type=str, required=True, help='Type of embedding used in the model', choices=['single_emb', 'double_emb', "forward_rot", "ise"])
+    parser.add_argument('--embedding_type', type=str, required=True, help='Type of embedding used in the model', choices=['single_emb', 'double_emb', "forward_rot", "ise", "attention_rot", "position_shift"])
     parser.add_argument('--base_model', type=str, default=None, help='Path to the base model')
     parser.add_argument('--batch_size', type=int, default=16, help='Batch size for the model')
 

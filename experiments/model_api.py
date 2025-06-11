@@ -136,6 +136,7 @@ def load_single_emb_model_and_tokenizer(
         quantization_config=bnb_config if quant_4bit else None,
         attn_implementation="sdpa",
         low_cpu_mem_usage=True,
+        weights_only=False,
     )
 
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)

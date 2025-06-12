@@ -263,7 +263,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--model', type=str, required=True, help='Path to the model')
     parser.add_argument('--max-new-tokens', type=int, default=1024, help='How many new tokens to generate')
-    parser.add_argument('--embedding-type', type=str, required=True, help='Type of embedding used in the model', choices=['single_emb', 'double_emb', "forward_rot", "ise", "attention_rot", "position_shift"])
+    parser.add_argument('--embedding-type', type=str, required=True, help='Type of embedding used in the model', choices=['single_emb', 'double_emb', "forward_rot", "ise", "attention_rot", "data_gap"])
     parser.add_argument('--base-model', type=str, default="none", help='Path to the base model')
     parser.add_argument('--batch-size', type=int, default=16, help='Batch size for the model')
 

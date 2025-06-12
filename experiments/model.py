@@ -123,7 +123,7 @@ def texts_to_prepared_ids(
         input_ids, attention_mask = prepare_input_ids(token_sequences, tokenizer)
         segment_ids = None
         
-    elif model_type in ("ise", "forward_rot", "attention_rot", "position_shift"):
+    elif model_type in ("ise", "forward_rot", "attention_rot", "data_gap"):
         # ASIDE and ISE: use segment_ids for role-based processing
         token_sequences = [
             (tokenized_seq[i]["input_ids"], text_sequences[i][1])
@@ -563,7 +563,7 @@ class AttentionRotMixin:
         return outputs
     
 
-class PositionShiftMixin:
+class DataGapMixin:
     def forward(
         self, *args,
         input_ids=None,
@@ -594,8 +594,8 @@ class PositionShiftMixin:
             # Always shift when generating
             shift_mask = torch.where(shift_mask[:, -1:], True, True)
         
-        position_shift = shift_mask.to(torch.int64) * self.data_shift
-        position_ids = position_ids + position_shift
+        data_gap = shift_mask.to(torch.int64) * self.data_shift
+        position_ids = position_ids + data_gap
         
         past_seen_tokens = past_key_values.get_seq_length() if past_key_values is not None else 0
         cache_position = torch.arange(
@@ -852,7 +852,7 @@ class QwenAttentionRot(AttentionRotMixin, QwenBase):
         self.register_buffer("rotation_matrix", rotation_matrix)
 
 
-class QwenPositionShift(PositionShiftMixin, QwenBase):
+class QwenDataGap(DataGapMixin, QwenBase):
     """Qwen model with ASIDE implementation."""
     
     def __init__(self, config: Qwen2Config):

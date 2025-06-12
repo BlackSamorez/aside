@@ -586,16 +586,29 @@ class PositionShiftMixin:
                 past_seen_tokens, past_seen_tokens + inputs_embeds.shape[1], device=inputs_embeds.device
             ).unsqueeze(0)
             
-        data_mask = (segment_ids == 1)
-        position_shift = data_mask * self.data_shift
+        nonzero_mask = segment_ids != 0
+        cumsum = nonzero_mask.cumsum(dim=-1)
+        shift_mask = cumsum > 0
+        
+        if inputs_embeds.shape[1] == 1:
+            # Always shift when generating
+            shift_mask = torch.where(shift_mask[:, -1:], True, True)
+        
+        position_shift = shift_mask.to(torch.int64) * self.data_shift
         position_ids = position_ids + position_shift
+        
+        past_seen_tokens = past_key_values.get_seq_length() if past_key_values is not None else 0
+        cache_position = torch.arange(
+            past_seen_tokens, past_seen_tokens + inputs_embeds.shape[1], device=inputs_embeds.device
+        ) + self.data_shift
+        kwargs["cache_position"] = cache_position
         
         kwargs.pop("segment_ids", None)
         if hasattr(self.model, "delete_num_items_in_batch"):
             kwargs.pop("num_items_in_batch", None)
             
         outputs = super().forward(
-            *args, input_ids=None, inputs_embeds=inputs_embeds, labels=labels, position_ids=position_ids, **kwargs
+            *args, input_ids=None, inputs_embeds=inputs_embeds, labels=labels, position_ids=position_ids, past_key_values=past_key_values, **kwargs
         )
         return outputs
 

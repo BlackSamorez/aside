@@ -288,7 +288,7 @@ if __name__ == "__main__":
         (instruct_model_path,
          data_model_path,
          tokenizer_path) = get_double_emb_paths(model_family)
-    elif embedding_type in ("ise", "forward_rot", "attention_rot", "data_gap"):
+    elif embedding_type in ("ise", "forward_rot", "attention_rot", "data_gap", "data_shift"):
         checkpoint_path = (
             f"../../models/{model_family}/{model}/train_checkpoints/"
             f"{train_v}/{model_type}_run_{run_n}/last"

@@ -123,7 +123,7 @@ def texts_to_prepared_ids(
         input_ids, attention_mask = prepare_input_ids(token_sequences, tokenizer)
         segment_ids = None
         
-    elif model_type in ("ise", "forward_rot", "attention_rot", "data_gap"):
+    elif model_type in ("ise", "forward_rot", "attention_rot", "data_gap", "data_shift"):
         # ASIDE and ISE: use segment_ids for role-based processing
         token_sequences = [
             (tokenized_seq[i]["input_ids"], text_sequences[i][1])
@@ -613,6 +613,54 @@ class DataGapMixin:
         return outputs
 
 
+class DataShiftMixin:
+    def forward(
+        self, *args,
+        input_ids=None,
+        attention_mask=None,
+        position_ids=None,
+        past_key_values=None,
+        inputs_embeds=None, 
+        segment_ids=None, labels=None,
+        **kwargs
+    ):
+        if (input_ids is None) ^ (inputs_embeds is not None):
+            raise ValueError("You must specify exactly one of input_ids or inputs_embeds")
+
+        if inputs_embeds is None:
+            inputs_embeds = self.model.embed_tokens(input_ids)
+
+        if position_ids is None:
+            past_seen_tokens = past_key_values.get_seq_length() if past_key_values is not None else 0
+            position_ids = torch.arange(
+                past_seen_tokens, past_seen_tokens + inputs_embeds.shape[1], device=inputs_embeds.device
+            ).unsqueeze(0)
+
+        shift_mask = segment_ids != 0
+        
+        if inputs_embeds.shape[1] == 1:
+            # Never shift when generating
+            shift_mask = torch.where(shift_mask[:, -1:], False, False)
+        
+        data_shift = shift_mask.to(torch.int64) * self.data_shift
+        position_ids = position_ids + data_shift
+        
+        past_seen_tokens = past_key_values.get_seq_length() if past_key_values is not None else 0
+        cache_position = torch.arange(
+            past_seen_tokens, past_seen_tokens + inputs_embeds.shape[1], device=inputs_embeds.device
+        ) + self.data_shift
+        kwargs["cache_position"] = cache_position
+        
+        kwargs.pop("segment_ids", None)
+        if hasattr(self.model, "delete_num_items_in_batch"):
+            kwargs.pop("num_items_in_batch", None)
+            
+        outputs = super().forward(
+            *args, input_ids=None, inputs_embeds=inputs_embeds, labels=labels, position_ids=position_ids, past_key_values=past_key_values, **kwargs
+        )
+        return outputs
+
+
 ##################
 # Llama Model Implementations
 ##################
@@ -852,9 +900,14 @@ class QwenAttentionRot(AttentionRotMixin, QwenBase):
         self.register_buffer("rotation_matrix", rotation_matrix)
 
 
-class QwenDataGap(DataGapMixin, QwenBase):
-    """Qwen model with ASIDE implementation."""
-    
+class QwenDataGap(DataGapMixin, QwenBase):    
+    def __init__(self, config: Qwen2Config):
+        super().__init__(config)
+        self.config = config
+        self.data_shift = config.data_shift
+
+
+class QwenDataShift(DataShiftMixin, QwenBase):    
     def __init__(self, config: Qwen2Config):
         super().__init__(config)
         self.config = config

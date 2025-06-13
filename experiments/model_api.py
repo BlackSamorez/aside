@@ -275,7 +275,7 @@ class CustomModelHandler:
             rank (int, optional): Distributed training rank
             post_init_rotation (bool): Apply rotation after initialization
         """
-        assert embedding_type in ("single_emb", "double_emb", "ise", "forward_rot", "attention_rot", "data_gap")
+        assert embedding_type in ("single_emb", "double_emb", "ise", "forward_rot", "attention_rot", "data_gap", "data_shift")
         if embedding_type == "single_emb":
             self.split_chat = False
         else:
@@ -1406,6 +1406,7 @@ class CustomModelHandler:
                 "forward_rot": QwenForwardRot,
                 "attention_rot": QwenAttentionRot,
                 "data_gap": QwenDataGap,
+                "data_shift": QwenDataShift,
             },
             "mistral": {
                 "single_emb": MistralBase,

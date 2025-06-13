@@ -61,13 +61,26 @@
                 }
             ]
         },
-        "position_shift": {
+        "data_gap": {
             "pure_models": [
                 {
-                    "name": "position_shift",
+                    "name": "data_gap",
                     "desc": "Qwen2.5 7B base model",
                     "checkpoint_to_load_from": null,
-                    "checkpoint_to_load_to": "./models/Qwen2.5-7B/position_shift",
+                    "checkpoint_to_load_to": "./models/Qwen2.5-7B/data_gap",
+                    "chat_template_path": null,
+                    "instruct_model_path": "Qwen/Qwen2.5-7B",
+                    "data_model_path": "Qwen/Qwen2.5-7B"
+                }
+            ]
+        },
+        "data_shift": {
+            "pure_models": [
+                {
+                    "name": "data_shift",
+                    "desc": "Qwen2.5 7B base model",
+                    "checkpoint_to_load_from": null,
+                    "checkpoint_to_load_to": "./models/Qwen2.5-7B/data_shift",
                     "chat_template_path": null,
                     "instruct_model_path": "Qwen/Qwen2.5-7B",
                     "data_model_path": "Qwen/Qwen2.5-7B"

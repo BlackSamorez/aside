@@ -520,7 +520,7 @@ if __name__ == "__main__":
 
 
     parser.add_argument('--model', type=str, required=True, help='Path to the model')
-    parser.add_argument('--embedding_type', type=str, required=True, help='Type of embedding used in the model', choices=['single_emb', 'double_emb', "forward_rot", "ise", "attention_rot", "data_gap"])
+    parser.add_argument('--embedding_type', type=str, required=True, help='Type of embedding used in the model', choices=['single_emb', 'double_emb', "forward_rot", "ise", "attention_rot", "data_gap", "data_shift"])
     parser.add_argument('--base_model', type=str, default=None, help='Path to the base model')
     parser.add_argument('--batch_size', type=int, default=16, help='Batch size for the model')
 
